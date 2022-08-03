@@ -14,24 +14,24 @@ return new class extends Migration
     public function up()
     {
         Schema::create('people', function (Blueprint $table) {
-            
+
             $table->engine = 'InnoDB';
 
             $table->bigIncrements('id');
 
-            $table -> string('type_doc');
-            $table -> string('number_doc');
-            $table -> string('lastnames');
-            $table -> string('names');
-            $table -> date('birthdate');
-            $table -> string('email')->nullable();
-            $table -> string('phone');
+            $table->string('type_doc');
+            $table->string('number_doc');
+            $table->string('lastnames');
+            $table->string('names');
+            $table->date('birthdate')->nullable();
+            $table->string('email')->nullable();
+            $table->string('phone')->nullable();
 
-            $table->bigInteger('country')->nullable()->unsigned();
-            
+            $table->bigInteger('_country')->unsigned()->nullable();
+
             $table->timestamps();
 
-            $table->foreign('country')->references('id')->on('countries')->onDelete('set null');
+            $table->foreign('_country')->references('id')->on('countries')->onDelete('set null');
 
         });
     }

@@ -33,8 +33,13 @@ class PersonController extends Controller
     public function create()
     {
         $person = new Person();
+        $docs = [
+            'DNI' => 'DNI',
+            'RUC' => 'RUC',
+            'CE' => 'CE'
+        ];
         $countries = Country::pluck('country', 'id');
-        return view('person.create', compact('person', 'countries'));
+        return view('person.create', compact('person', 'countries', 'docs'));
     }
 
     /**
@@ -75,8 +80,13 @@ class PersonController extends Controller
     public function edit($id)
     {
         $person = Person::find($id);
-
-        return view('person.edit', compact('person'));
+        $docs = [
+            'DNI' => 'DNI',
+            'RUC' => 'RUC',
+            'CE' => 'CE'
+        ];
+        $countries = Country::pluck('country', 'id');
+        return view('person.edit', compact('person', 'countries', 'docs'));
     }
 
     /**

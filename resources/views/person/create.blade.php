@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('template_title')
-    Create Person
+    Agregar una persona
 @endsection
 
 @section('content')
@@ -13,7 +13,7 @@
 
                 <div class="card card-default">
                     <div class="card-header">
-                        <span class="card-title">Create Person</span>
+                        <span class="card-title">Agregar una persona</span>
                     </div>
                     <div class="card-body">
                         <form method="POST" action="{{ route('people.store') }}"  role="form" enctype="multipart/form-data">

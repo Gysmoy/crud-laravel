@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('template_title')
-    Create Country
+    Agregar un pais
 @endsection
 
 @section('content')
@@ -13,7 +13,7 @@
 
                 <div class="card card-default">
                     <div class="card-header">
-                        <span class="card-title">Create Country</span>
+                        <span class="card-title">Agregar un pais</span>
                     </div>
                     <div class="card-body">
                         <form method="POST" action="{{ route('countries.store') }}"  role="form" enctype="multipart/form-data">

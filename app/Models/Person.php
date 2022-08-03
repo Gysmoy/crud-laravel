@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property $birthdate
  * @property $email
  * @property $phone
- * @property $country
+ * @property $_country
  * @property $created_at
  * @property $updated_at
  *
@@ -31,8 +31,9 @@ class Person extends Model
 		'number_doc' => 'required',
 		'lastnames' => 'required',
 		'names' => 'required',
-		'birthdate' => 'required',
-		'phone' => 'required',
+		'birthdate' => '',
+    'email' => 'nullable|email|min:0|max:320',
+		'phone' => '',
     ];
 
     protected $perPage = 20;
@@ -42,7 +43,7 @@ class Person extends Model
      *
      * @var array
      */
-    protected $fillable = ['type_doc','number_doc','lastnames','names','birthdate','email','phone','country'];
+    protected $fillable = ['type_doc','number_doc','lastnames','names','birthdate','email','phone','_country'];
 
 
     /**
@@ -50,7 +51,7 @@ class Person extends Model
      */
     public function country()
     {
-        return $this->hasOne('App\Models\Country', 'id', 'country');
+        return $this->hasOne('App\Models\Country', 'id', '_country');
     }
     
 
