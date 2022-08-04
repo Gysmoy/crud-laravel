@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Person;
 use App\Models\Country;
+use App\Models\Response;
+use Exception;
 use Illuminate\Http\Request;
 
 /**
@@ -17,12 +19,28 @@ class PersonController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $people = Person::paginate();
+        $response = new Response();
+        try {
+            $peopleJpa = Person::all();
 
-        return view('person.index', compact('people'))
-            ->with('i', (request()->input('page', 1) - 1) * $people->perPage());
+            foreach ($peopleJpa as $key => $person) {
+                $country = Country::find($person->_country);
+                $peopleJpa[$key]->country = $country;
+            }
+
+            $response->setStatus(200);
+            $response->setMessage('Operación correcta');
+            $response->setData($peopleJpa);
+        } catch (\Throwable $th) {
+            $response->setMessage($th->getMessage());
+        } finally {
+            return response(
+                $response->toArray(),
+                $response->status
+            );
+        }
     }
 
     /**
@@ -32,14 +50,6 @@ class PersonController extends Controller
      */
     public function create()
     {
-        $person = new Person();
-        $docs = [
-            'DNI' => 'DNI',
-            'RUC' => 'RUC',
-            'CE' => 'CE'
-        ];
-        $countries = Country::pluck('country', 'id');
-        return view('person.create', compact('person', 'countries', 'docs'));
     }
 
     /**
@@ -50,12 +60,35 @@ class PersonController extends Controller
      */
     public function store(Request $request)
     {
-        request()->validate(Person::$rules);
+        $response = new Response();
+        try {
 
-        $person = Person::create($request->all());
+            if (!in_array($request->type_doc, ['DNI', 'RUC', 'CE'])) {
+                throw new Exception('type_doc debe ser DNI, RUC o CE', 1);
+            }
 
-        return redirect()->route('people.index')
-            ->with('success', 'Person created successfully.');
+            $personJpa = new Person();
+            $personJpa->type_doc = $request->type_doc;
+            $personJpa->number_doc = $request->number_doc;
+            $personJpa->lastnames = $request->lastnames;
+            $personJpa->names = $request->names;
+            $personJpa->birthdate = $request->birthdate;
+            $personJpa->email = $request->email;
+            $personJpa->phone = $request->phone;
+            $personJpa->_country = $request->_country;
+            $personJpa->save();
+
+            $response->setStatus(200);
+            $response->setMessage('Operación correcta');
+            $response->setData($personJpa);
+        } catch (\Throwable $th) {
+            $response->setMessage($th->getMessage());
+        } finally {
+            return response(
+                $response->toArray(),
+                $response->getStatus()
+            );
+        }
     }
 
     /**
@@ -77,16 +110,39 @@ class PersonController extends Controller
      * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Request $request)
     {
-        $person = Person::find($id);
-        $docs = [
-            'DNI' => 'DNI',
-            'RUC' => 'RUC',
-            'CE' => 'CE'
-        ];
-        $countries = Country::pluck('country', 'id');
-        return view('person.edit', compact('person', 'countries', 'docs'));
+        $response = new Response();
+        try {
+            if (!in_array($request->type_doc, ['DNI', 'RUC', 'CE'])) {
+                throw new Exception('type_doc debe ser DNI, RUC o CE', 1);
+            }
+
+            $personJpa = Person::find($request->id);
+            if ($personJpa == null) {
+                throw new Exception('La persona que deseas editar no existe', 1);
+            }
+            $personJpa->type_doc = $request->type_doc;
+            $personJpa->number_doc = $request->number_doc;
+            $personJpa->lastnames = $request->lastnames;
+            $personJpa->names = $request->names;
+            $personJpa->birthdate = $request->birthdate;
+            $personJpa->email = $request->email;
+            $personJpa->phone = $request->phone;
+            $personJpa->_country = $request->_country;
+            $personJpa->save();
+
+            $response->setStatus(200);
+            $response->setMessage('Operación correcta');
+            $response->setData($personJpa);
+        } catch (\Throwable $th) {
+            $response->setMessage($th->getMessage());
+        } finally {
+            return response(
+                $response->toArray(),
+                $response->getStatus()
+            );
+        }
     }
 
     /**
@@ -111,11 +167,24 @@ class PersonController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      * @throws \Exception
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
-        $person = Person::find($id)->delete();
-
-        return redirect()->route('people.index')
-            ->with('success', 'Person deleted successfully');
+        $response = new Response();
+        try {
+            $personJpa = Person::find($request->id);
+            if ($personJpa == null) {
+                throw new Exception('La persona que deseas eliminar no existe', 1);
+            }
+            $personJpa->delete();
+            $response->setStatus(200);
+            $response->setMessage('Eliminado correctamente');
+        } catch (\Throwable $th) {
+            $response->setMessage($th->getMessage());
+        } finally {
+            return response(
+                $response->toArray(),
+                $response->status
+            );
+        }
     }
 }

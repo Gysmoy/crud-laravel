@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Country;
+use App\Models\Response;
+use Exception;
 use Illuminate\Http\Request;
 
 /**
@@ -16,12 +18,23 @@ class CountryController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $countries = Country::paginate();
+        $response = new Response();
+        try {
+            $countriesJpa = Country::all();
 
-        return view('country.index', compact('countries'))
-            ->with('i', (request()->input('page', 1) - 1) * $countries->perPage());
+            $response->setStatus(200);
+            $response->setMessage('Operación correcta');
+            $response->setData($countriesJpa);
+        } catch (\Throwable $th) {
+            $response->setMessage($th->getMessage());
+        } finally {
+            return response(
+                $response->toArray(),
+                $response->getStatus()
+            );
+        }
     }
 
     /**
@@ -31,8 +44,6 @@ class CountryController extends Controller
      */
     public function create()
     {
-        $country = new Country();
-        return view('country.create', compact('country'));
     }
 
     /**
@@ -43,12 +54,23 @@ class CountryController extends Controller
      */
     public function store(Request $request)
     {
-        request()->validate(Country::$rules);
+        $response = new Response();
+        try {
+            $countryJpa = new Country();
+            $countryJpa->country = $request->country;
+            $countryJpa->save();
 
-        $country = Country::create($request->all());
-
-        return redirect()->route('countries.index')
-            ->with('success', 'Country created successfully.');
+            $response->setStatus(200);
+            $response->setMessage('El país ha sido agregado correctamente');
+            $response->setData($countryJpa);
+        } catch (\Throwable $th) {
+            $response->setMessage($th->getMessage());
+        } finally {
+            return response(
+                $response->toArray(),
+                $response->getStatus()
+            );
+        }
     }
 
     /**
@@ -70,11 +92,28 @@ class CountryController extends Controller
      * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Request $request)
     {
-        $country = Country::find($id);
+        $response = new Response();
+        try {
+            $countryJpa = Country::find($request->id);
+            if ($countryJpa == null) {
+                throw new Exception('El pais que deseas editar no existe', 1);
+            }
+            $countryJpa->country = $request->country;
+            $countryJpa->save();
 
-        return view('country.edit', compact('country'));
+            $response->setStatus(200);
+            $response->setMessage('El país ha sido actualizado correctamente');
+            $response->setData($countryJpa);
+        } catch (\Throwable $th) {
+            $response->setMessage($th->getMessage());
+        } finally {
+            return response(
+                $response->toArray(),
+                $response->status
+            );
+        }
     }
 
     /**
@@ -99,11 +138,24 @@ class CountryController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      * @throws \Exception
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
-        $country = Country::find($id)->delete();
-
-        return redirect()->route('countries.index')
-            ->with('success', 'Country deleted successfully');
+        $response = new Response();
+        try {
+            $countryJpa = Country::find($request->id);
+            if ($countryJpa == null) {
+                throw new Exception('La persona que deseas eliminar no existe', 1);
+            }
+            $countryJpa->delete();
+            $response->setStatus(200);
+            $response->setMessage('Eliminado correctamente');
+        } catch (\Throwable $th) {
+            $response->setMessage($th->getMessage());
+        } finally {
+            return response(
+                $response->toArray(),
+                $response->status
+            );
+        }
     }
 }
