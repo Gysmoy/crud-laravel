@@ -7,6 +7,7 @@ use App\Models\Country;
 use App\Models\Response;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class PersonController
@@ -24,15 +25,30 @@ class PersonController extends Controller
         $response = new Response();
         try {
             $peopleJpa = Person::all();
+            $peopleJpa = Person::select([
+                    'people.*',
+                    'countries.id AS country.id',
+                    'countries.country AS country.country',
+                    'countries.updated_at AS country.updated_at',
+                    'countries.created_at AS country.created_at'
+                ])
+                -> leftjoin('countries', 'people._country', '=', 'countries.id')
+                -> get();
 
-            foreach ($peopleJpa as $key => $person) {
-                $country = Country::find($person->_country);
-                $peopleJpa[$key]->country = $country;
+            $people = array();
+            foreach($peopleJpa as $personJpa) {
+                $person = new Person();
+                $person -> id = $personJpa -> id;
+                $person -> type_doc = $personJpa -> type_doc;
+                $person -> number_doc = $personJpa -> number_doc;
+                $person -> lastnames = $personJpa -> lastnames;
+                $person -> names = $personJpa -> names;
+                $people[] = $person;
             }
 
             $response->setStatus(200);
             $response->setMessage('Operación correcta');
-            $response->setData($peopleJpa);
+            $response->setData($people);
         } catch (\Throwable $th) {
             $response->setMessage($th->getMessage());
         } finally {
@@ -80,7 +96,7 @@ class PersonController extends Controller
 
             $response->setStatus(200);
             $response->setMessage('Operación correcta');
-            $response->setData($personJpa);
+            $response->setData($personJpa -> toArray());
         } catch (\Throwable $th) {
             $response->setMessage($th->getMessage());
         } finally {

@@ -23,3 +23,6 @@ Route::resource('countries', App\Http\Controllers\CountryController::class);
 Route::resource('people', App\Http\Controllers\PersonController::class);
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+
+//Route::get('/employees/getEmployees/','PedidosController@getEmployees')->name('employees.getEmployees');

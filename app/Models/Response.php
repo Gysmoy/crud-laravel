@@ -5,7 +5,7 @@ namespace App\Models;
 class Response {
     public int $status;
     public string $message;
-    public object $data;
+    public array $data;
     public int $draw;
     public int $iTotalDisplayRecords;
     public int $iTotalRecords;
@@ -32,10 +32,10 @@ class Response {
     public function setMessage(string $message): void {
         $this->message = $message;
     }
-    public function getData(): object {
+    public function getData(): array {
         return $this->data;
     }
-    public function setData(object $data): void {
+    public function setData(array $data): void {
         $this->data = $data;
     }
     public function getDraw(): int {
